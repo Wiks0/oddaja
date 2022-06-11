@@ -20,7 +20,11 @@ import java.util.Random;
 
 public class Board extends JPanel {
 
-    private Dimension d;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2227341085817477927L;
+	private Dimension d;
     private List<Vesoljcek> vesoljcki;
     private Igralec igralec;
     private Strel strel;
@@ -71,13 +75,15 @@ public class Board extends JPanel {
         strel = new Strel();
     }
 
-    private void drawAliens(Graphics g) {
+    private void narisiVesoljcka(Graphics g) {
+        var alienImg = "src/images/rsz_invadership.png";
+        var ii = new ImageIcon(alienImg);
 
         for (Vesoljcek vesoljcek : vesoljcki) {
 
             if (vesoljcek.jePrikazan()) {
 
-                g.drawImage(vesoljcek.getImage(), vesoljcek.getX(), vesoljcek.getY(), Nastavitve.ALIEN_WIDTH, Nastavitve.ALIEN_HEIGHT, this);
+                g.drawImage(ii.getImage(), vesoljcek.getX(), vesoljcek.getY(), Nastavitve.ALIEN_WIDTH, Nastavitve.ALIEN_HEIGHT, this);
             }
 
             if (vesoljcek.isDying()) {
@@ -144,7 +150,7 @@ public class Board extends JPanel {
             g.drawString("Score: " + Integer.toString(this.tocke), Nastavitve.sirinaOkna - 100,50);
 
 
-            drawAliens(g);
+            narisiVesoljcka(g);
             drawPlayer(g);
             drawStrel(g);
             drawBombing(g);
@@ -161,7 +167,7 @@ public class Board extends JPanel {
         Toolkit.getDefaultToolkit().sync();
     }
 
-    private void gameOver(Graphics g) {
+    private void gameOver (Graphics g) {
     	g.setColor(Color.black);
         g.fillRect(0, 0, Nastavitve.sirinaOkna, Nastavitve.visinaOkna);
         g.setColor(new Color(0, 32, 48));
@@ -177,10 +183,12 @@ public class Board extends JPanel {
         g.drawString(tekst, (Nastavitve.sirinaOkna - fontMetrics.stringWidth(tekst)) / 2,
                 Nastavitve.sirinaOkna / 2);
         g.drawString("Score: " + Integer.toString(this.tocke), (Nastavitve.sirinaOkna - fontMetrics.stringWidth(tekst)) / 2,
-                Nastavitve.sirinaOkna / 2 + 50);
+                Nastavitve.sirinaOkna / 2 + 50); 
+        
+        
     }
 
-    private void update() {
+    private void posodobi() {
 
         if (stVnicenih == Nastavitve.steviloVesoljckov) {
 
@@ -329,7 +337,7 @@ public class Board extends JPanel {
 
     private void doGameCycle() {
 
-        update();
+        posodobi();
         repaint();
     }
 
@@ -371,3 +379,4 @@ public class Board extends JPanel {
                 }
             }
         }
+    }}
