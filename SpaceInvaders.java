@@ -4,7 +4,12 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 public class SpaceInvaders extends JFrame  {
 
-    public SpaceInvaders() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3666345753500236646L;
+
+	public SpaceInvaders() {
 
         zacetniUI();
     }
