@@ -4,7 +4,6 @@ import java.awt.event.KeyEvent;
 
 
 public class Igralec extends ObjektIgre {
-	private int width;
 
     public Igralec() {
 
@@ -12,14 +11,14 @@ public class Igralec extends ObjektIgre {
     }
 
     private void ustvariIgralca() {
-
-        int zacetniX = 270;
+    	//Dolocimo zacetno pozicijo igralca
+        int zacetniX = 300;
         setX(zacetniX);
         int zacetniY = 600 - Nastavitve.visinaIgralca;
         setY(zacetniY);
     }
 
-    public void act() {
+    public void prestaviIgralca() {
 
         x += premik;
 
@@ -27,25 +26,22 @@ public class Igralec extends ObjektIgre {
 
             x = 3;
         }
+        //Omogocimo, da igralec ostane znotraj okna
+        if (x >= Nastavitve.sirinaOkna - 40) {
 
-        if (x >= Nastavitve.sirinaOkna - 2 * width) {
-
-            x = Nastavitve.sirinaOkna - 2 * width;
-        }
-    }
+            x = Nastavitve.sirinaOkna - 40;
+        } }
 
     public void keyPressed(KeyEvent k) {
-
+    	//Vpravljanje igralca s puscicami
         int tipka = k.getKeyCode();
-
-        if (tipka == KeyEvent.VK_LEFT) {
-
-            premik = -5;
-        }
-
-        if (tipka == KeyEvent.VK_RIGHT) {
-
-           premik = 5;
+        switch(tipka) {
+        case KeyEvent.VK_LEFT:
+        	premik = -5;
+        	break;
+        case KeyEvent.VK_RIGHT:
+        	premik = 5;
+        	break;
         }
     }
 
@@ -53,14 +49,10 @@ public class Igralec extends ObjektIgre {
 
         int tipka = k.getKeyCode();
 
-        if (tipka == KeyEvent.VK_LEFT) {
+        if (tipka == KeyEvent.VK_LEFT | tipka == KeyEvent.VK_RIGHT ) {
 
             premik = 0;
         }
 
-        if (tipka == KeyEvent.VK_RIGHT) {
-
-            premik = 0;
-        }
     }
 }
