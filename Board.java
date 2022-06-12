@@ -19,12 +19,12 @@ import java.util.List;
 import java.util.Random;
 
 public class Board extends JPanel {
-	//Nastavimo atribute, ki jih potrebujemo znotraj razreda
+    //Nastavimo atribute, ki jih potrebujemo znotraj razreda
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 2227341085817477927L;
-	private Dimension dim;
+    private static final long serialVersionUID = 2227341085817477927L;
+    private Dimension dim;
     private List<Vesoljcek> vesoljcki;
     private Igralec igralec;
     private Strel strel;
