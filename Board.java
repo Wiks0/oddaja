@@ -19,54 +19,51 @@ import java.util.List;
 import java.util.Random;
 
 public class Board extends JPanel {
-
+	//Nastavimo atribute, ki jih potrebujemo znotraj razreda
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 2227341085817477927L;
-	private Dimension d;
+	private Dimension dim;
     private List<Vesoljcek> vesoljcki;
     private Igralec igralec;
     private Strel strel;
     private int tocke;
-    
     private int smer = -2;
-    private int stVnicenih = 0;
-
-    private boolean seIgra = true;
-    private String explImg = "src/images/explosion.png";
+    private int stUnicenih = 0;
+    private int sirinaVesoljcka = 16;
+    private int visinaVesoljcka = 16;
+  
+    private boolean seIgra = true; //Sledi ali je igra aktivna in kdaj jo ustaviti
+    private String explIkona = "src/images/explosion.png";
     private String tekst = "Game Over";
 
     private Timer timer;
-
-
     public Board() {
     	initBoard();
-        gameInit();}
-
+        igraInit();}
     private void initBoard() {
 
-        addKeyListener(new TAdapter());
+        addKeyListener(new Kljuc());
         setFocusable(true);
-        d = new Dimension(Nastavitve.sirinaOkna, Nastavitve.visinaOkna);
+        dim = new Dimension(Nastavitve.sirinaOkna, Nastavitve.visinaOkna);
         setBackground(Color.BLACK);
-
-        timer = new Timer(Nastavitve.DELAY, new GameCycle());
+        timer = new Timer(Nastavitve.zamik, new KrogIgre());
         timer.start();
 
-        gameInit();
+        igraInit();
     }
 
 
-    private void gameInit() {
+    private void igraInit() {
 
         vesoljcki = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 10; j++) {
 
-                var vesoljcek = new Vesoljcek(Nastavitve.ALIEN_INIT_X + 30 * j,
-                        Nastavitve.ALIEN_INIT_Y + 30 * i);
+                var vesoljcek = new Vesoljcek(Nastavitve.vesoljcekX + 30 * j,
+                        Nastavitve.vesoljcekY + 30 * i);
                 vesoljcki.add(vesoljcek);
             }
         }
@@ -83,33 +80,33 @@ public class Board extends JPanel {
 
             if (vesoljcek.jePrikazan()) {
 
-                g.drawImage(ii.getImage(), vesoljcek.getX(), vesoljcek.getY(), Nastavitve.ALIEN_WIDTH, Nastavitve.ALIEN_HEIGHT, this);
+                g.drawImage(ii.getImage(), vesoljcek.getX(), vesoljcek.getY(), sirinaVesoljcka, visinaVesoljcka, this);
             }
 
-            if (vesoljcek.isDying()) {
+            if (vesoljcek.vUnicenju()) {
 
                 vesoljcek.die();
             }
         }
     }
 
-    private void drawPlayer(Graphics g) {
+    private void narisiIgralca(Graphics g) {
     	  var igralecIkona = "src/images/rsz_heroship.png";
           var ikona = new ImageIcon(igralecIkona);
 
         if (igralec.jePrikazan()) {
 
-            g.drawImage(ikona.getImage(), igralec.getX(), igralec.getY(), Nastavitve.PLAYER_WIDTH, Nastavitve.visinaIgralca, this);
+            g.drawImage(ikona.getImage(), igralec.getX(), igralec.getY(), 20, Nastavitve.visinaIgralca, this);
         }
 
-        if (igralec.isDying()) {
+        if (igralec.vUnicenju()) {
 
             igralec.die();
             seIgra = false;
         }
     }
 
-    private void drawStrel(Graphics g) {
+    private void narisiStrel(Graphics g) {
 
         if (strel.jePrikazan()) {
 
@@ -117,13 +114,13 @@ public class Board extends JPanel {
         }
     }
 
-    private void drawBombing(Graphics g) {
+    private void narisiBombo(Graphics g) {
 
         for (Vesoljcek a : vesoljcki) {
 
-            Vesoljcek.Bomba b = a.getBomb();
+            Vesoljcek.Bomba b = a.getBomba();
 
-            if (!b.isDestroyed()) {
+            if (!b.jeUnicen()) {
 
                 g.drawImage(b.getImage(), b.getX(), b.getY(), this);
             }
@@ -134,13 +131,13 @@ public class Board extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        doDrawing(g);
+        risiObjekte(g);
     }
 
-    private void doDrawing(Graphics g) {
+    private void risiObjekte(Graphics g) {
     	final Color background = new Color(35,31,32);
         g.setColor(background);
-        g.fillRect(0, 0, d.width, d.height);
+        g.fillRect(0, 0, dim.width, dim.height);
         g.setColor(Color.BLUE);
 
         if (seIgra) {
@@ -148,18 +145,16 @@ public class Board extends JPanel {
         	g.fillRect(0, 600, Nastavitve.sirinaOkna, 600);
             g.setColor(Color.GREEN);
             g.drawString("Score: " + Integer.toString(this.tocke), Nastavitve.sirinaOkna - 100,50);
-
-
             narisiVesoljcka(g);
-            drawPlayer(g);
-            drawStrel(g);
-            drawBombing(g);
+            narisiIgralca(g);
+            narisiStrel(g);
+            narisiBombo(g);
 
         } else {
 
             if (timer.isRunning()) {
                 timer.stop();
-            }
+           }
 
             gameOver(g);
         }
@@ -168,6 +163,7 @@ public class Board extends JPanel {
     }
 
     private void gameOver (Graphics g) {
+    	//Nastavimo zaslon, ki se prikaze, ko je igre konec
     	g.setColor(Color.black);
         g.fillRect(0, 0, Nastavitve.sirinaOkna, Nastavitve.visinaOkna);
         g.setColor(new Color(0, 32, 48));
@@ -179,178 +175,156 @@ public class Board extends JPanel {
 
         g.setColor(Color.white);
         g.setFont(small);
-        var fontMetrics = this.getFontMetrics(small);
-        g.drawString(tekst, (Nastavitve.sirinaOkna - fontMetrics.stringWidth(tekst)) / 2,
-                Nastavitve.sirinaOkna / 2);
-        g.drawString("Score: " + Integer.toString(this.tocke), (Nastavitve.sirinaOkna - fontMetrics.stringWidth(tekst)) / 2,
-                Nastavitve.sirinaOkna / 2 + 50); 
+        var dolzina = this.getFontMetrics(small);
+        g.drawString(tekst, (Nastavitve.sirinaOkna - dolzina.stringWidth(tekst)) / 2, Nastavitve.sirinaOkna / 2);
+        g.drawString("Score: " + Integer.toString(this.tocke), (Nastavitve.sirinaOkna - dolzina.stringWidth(tekst)) / 2, Nastavitve.sirinaOkna / 2 + 50); 
         
         
     }
-
+    //Metoda za posodabljanje objektov skozi igranje
     private void posodobi() {
-
-        if (stVnicenih == Nastavitve.steviloVesoljckov) {
-
-            seIgra = false;
+    	if (stUnicenih == Nastavitve.steviloVesoljckov) {
+    		seIgra = false;
             timer.stop();
             tekst = "Game won!";
         }
 
-        // player
-        igralec.act();
+        igralec.prestaviIgralca();
 
-        // shot
         if (strel.jePrikazan()) {
 
-            int shotX = strel.getX();
-            int shotY = strel.getY();
+            int strelX = strel.getX();
+            int strelY = strel.getY();
 
             for (Vesoljcek vesoljcek : vesoljcki) {
 
                 int vesoljcekX = vesoljcek.getX();
                 int vesoljcekY = vesoljcek.getY();
-
+                //Obravnavamo primer, ko s strelom zadanemo vesoljcka
                 if (vesoljcek.jePrikazan() && strel.jePrikazan()) {
-                   if (shotX >= (vesoljcekX)
-                           && shotX <= (vesoljcekX + Nastavitve.ALIEN_WIDTH)
-                           && shotY >= (vesoljcekY)
-                           && shotY <= (vesoljcekY + Nastavitve.ALIEN_HEIGHT)) {
+                   if (strelX >= (vesoljcekX) && strelX <= (vesoljcekX + sirinaVesoljcka) && strelY >= (vesoljcekY)&& strelY <= (vesoljcekY + visinaVesoljcka))
+                             {
 
-                        var ii = new ImageIcon(explImg);
-                        vesoljcek.setImage(ii.getImage());
-                        vesoljcek.setDying(true);
-                        stVnicenih++;
+                        var eksplozija = new ImageIcon(explIkona);
+                        vesoljcek.setIkona(eksplozija.getImage());
+                        vesoljcek.setvUnicenju(true);
+                        stUnicenih++;
                         tocke += 50;
                         strel.die();
-                    }
-                }
-            }
-
+                    }}}
+            //Premik strela. Ce je y<0 se uniči
             int y = strel.getY();
-            y -= 4;
+            y -= 5; //Hitrost s katero se v y smer giblje nas metek
 
             if (y < 0) {
                 strel.die();
             } else {
                 strel.setY(y);
-            }
-        }
-
-        // aliens
+            } }
 
         for (Vesoljcek vesoljcek : vesoljcki) {
 
             int x = vesoljcek.getX();
-
+            //Upravljanje s premiki vesoljcka. Ce pridejo do roba se predznak gibanja obrne in se za Nastavitve.premikY pomakne proti dnu
             if (x >= Nastavitve.sirinaOkna - 30 && smer != -2) {
 
                 smer = -2;
 
-                Iterator<Vesoljcek> i1 = vesoljcki.iterator();
+                Iterator<Vesoljcek> v1 = vesoljcki.iterator();
 
-                while (i1.hasNext()) {
+                while (v1.hasNext()) {
 
-                    Vesoljcek a2 = i1.next();
-                    a2.setY(a2.getY() + Nastavitve.premikY);
+                    Vesoljcek v2 = v1.next();
+                    v2.setY(v2.getY() + Nastavitve.premikY);
                 }
             }
 
             if (x <= 5 && smer != 2) {
 
                 smer = 2;
+                Iterator<Vesoljcek> v3 = vesoljcki.iterator();
 
-                Iterator<Vesoljcek> i2 = vesoljcki.iterator();
+                while (v3.hasNext()) {
 
-                while (i2.hasNext()) {
-
-                    Vesoljcek a = i2.next();
+                    Vesoljcek a = v3.next();
                     a.setY(a.getY() + Nastavitve.premikY);
-                }
-            }
-        }
+                }}}
 
-        Iterator<Vesoljcek> it = vesoljcki.iterator();
+        Iterator<Vesoljcek> v4 = vesoljcki.iterator();
 
-        while (it.hasNext()) {
+        while (v4.hasNext()) {
 
-            Vesoljcek vesoljcek = it.next();
+            Vesoljcek vesoljcek = v4.next();
 
             if (vesoljcek.jePrikazan()) {
 
                 int y = vesoljcek.getY();
-
-                if (y > 600 - Nastavitve.ALIEN_HEIGHT) {
+                //Pogoj, ko pridejo vesoljcki do dna
+                if (y > 600 - visinaVesoljcka) {
                     seIgra = false;
                     tekst = "Invasion!";
                 }
 
-                vesoljcek.act(smer);
-            }
-        }
-
-        // bombs
-        var generator = new Random();
+                vesoljcek.prestaviVesoljcka(smer);
+            }}
+        
+        //S pomocjo random() in nextInt() generiramo metke vesoljckov
+        var nakljucnoSt = new Random();
 
         for (Vesoljcek vesoljcek : vesoljcki) {
 
-            int shot = generator.nextInt(15);
-            Vesoljcek.Bomba bomb = vesoljcek.getBomb();
+            int poskus = nakljucnoSt.nextInt(15);
+            Vesoljcek.Bomba bomba = vesoljcek.getBomba();
+            
+            //Nastavimo pogoje pri katerih vesoljcek izstreli bombo
+            if (poskus == 1 && vesoljcek.jePrikazan() && bomba.jeUnicen()) {
 
-            if (shot == Nastavitve.CHANCE && vesoljcek.jePrikazan() && bomb.isDestroyed()) {
-
-                bomb.setDestroyed(false);
-                bomb.setX(vesoljcek.getX());
-                bomb.setY(vesoljcek.getY());
+                bomba.setUnicen(false);
+                bomba.setX(vesoljcek.getX());
+                bomba.setY(vesoljcek.getY());
             }
 
-            int bombX = bomb.getX();
-            int bombY = bomb.getY();
+            int bombaX = bomba.getX();
+            int bombaY = bomba.getY();
             int playerX = igralec.getX();
             int playerY = igralec.getY();
 
-            if (igralec.jePrikazan() && !bomb.isDestroyed()) {
+            //Primer ko bomba zadane in posledicno unici igralca
+            if (igralec.jePrikazan() && (bomba.jeUnicen() == false)) {
 
-                if (bombX >= (playerX)
-                        && bombX <= (playerX + Nastavitve.PLAYER_WIDTH)
-                        && bombY >= (playerY)
-                        && bombY <= (playerY + Nastavitve.visinaIgralca)) {
+                if (bombaX >= (playerX) && bombaX <= (playerX + 20) && bombaY >= (playerY) && bombaY <= (playerY + Nastavitve.visinaIgralca)) {
 
-                    var ii = new ImageIcon(explImg);
-                    igralec.setImage(ii.getImage());
-                    igralec.setDying(true);
-                    bomb.setDestroyed(true);
-                }
-            }
+                    var ii = new ImageIcon(explIkona);
+                    igralec.setIkona(ii.getImage());
+                    igralec.setvUnicenju(true);
+                    bomba.setUnicen(true);
+                }}
 
-            if (!bomb.isDestroyed()) {
+            if (bomba.jeUnicen() == false) {
 
-                bomb.setY(bomb.getY() + 1);
+                bomba.setY(bomba.getY() + 1); //Kontroliramo hitrost bomb
+                //Ko bomba pride do tal se unici
+                if (bomba.getY() >= 595) {
 
-                if (bomb.getY() >= 600 - Nastavitve.BOMB_HEIGHT) {
+                    bomba.setUnicen(true);
+                }}}}
 
-                    bomb.setDestroyed(true);
-                }
-            }
-        }
-    }
-
-    private void doGameCycle() {
-
+    private void zacniKrogIgre() {
+    	//Posodobimo in ponovno izrisemo objekte na nase okno
         posodobi();
         repaint();
     }
 
-    private class GameCycle implements ActionListener {
+    private class KrogIgre implements ActionListener {
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent k) {
 
-            doGameCycle();
+            zacniKrogIgre();
         }
     }
 
-    private class TAdapter extends KeyAdapter {
+    private class Kljuc extends KeyAdapter {
 
         @Override
         public void keyReleased(KeyEvent e) {
@@ -359,24 +333,15 @@ public class Board extends JPanel {
         }
 
         @Override
-        public void keyPressed(KeyEvent e) {
-
-            igralec.keyPressed(e);
-
+        public void keyPressed(KeyEvent k) {
+        	igralec.keyPressed(k);
             int x = igralec.getX();
             int y = igralec.getY();
 
-            int key = e.getKeyCode();
-
-            if (key == KeyEvent.VK_SPACE) {
-
-                if (seIgra) {
-
-                    if (strel.jePrikazan() == false) {
-
+            int kljuc = k.getKeyCode();
+            
+            //Omogoči, da moramo počakati, da prvi strel izgine iz zaslona preden izstrelimo naslednjega
+            if (kljuc == KeyEvent.VK_SPACE) {
+            	if ((seIgra) & (strel.jePrikazan() == false)){
                         strel = new Strel(x, y);
-                    }
-                }
-            }
-        }
-    }}
+                    }}}}}
