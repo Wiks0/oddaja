@@ -12,12 +12,13 @@ public class Strel extends ObjektIgre {
 
         var strelIkona = "src/images/shot.png";
         var ii = new ImageIcon(strelIkona);
-        setImage(ii.getImage());
+        setIkona(ii.getImage());
 
-        int H_SPACE = 6;
-        setX(x + H_SPACE);
+      //Iz kje bodo leteli streli
+        int odmikX = 10; 
+        setX(x + odmikX);
 
-        int V_SPACE = 1;
-        setY(y - V_SPACE);
+        int odmikY = 1;
+        setY(y - odmikY);
     }
 }
