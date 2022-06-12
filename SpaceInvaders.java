@@ -1,6 +1,5 @@
 package proj.sprite;
 
-import java.awt.EventQueue;
 import javax.swing.JFrame;
 public class SpaceInvaders extends JFrame  {
 
@@ -13,7 +12,7 @@ public class SpaceInvaders extends JFrame  {
 
         zacetniUI();
     }
-
+	//Ustvarimo okno
     private void zacetniUI() {
 
         add(new Board());
@@ -25,11 +24,9 @@ public class SpaceInvaders extends JFrame  {
     }
 
     public static void main(String[] args) {
-
-        EventQueue.invokeLater(() -> {
-        	var ex = new SpaceInvaders();
-            ex.setVisible(true);
-        });
+    		var spaceInvaders = new SpaceInvaders();
+            spaceInvaders.setVisible(true);
+        };
     }
-}
+
     
