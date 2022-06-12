@@ -8,8 +8,8 @@ public class ObjektIgre {
     int y;
     int premik;
     private boolean prikazan;
-    private Image image;
-    private boolean dying;
+    private Image ikona;
+    private boolean unicen;
 
     public ObjektIgre() {
 
@@ -31,23 +31,23 @@ public class ObjektIgre {
         this.prikazan = prikazan;
     }
 
-   public void setImage(Image image) {
+   public void setIkona(Image ikona) {
 
-        this.image = image;
+        this.ikona = ikona;
     }
 
    public Image getImage() {
 
-        return image;
+        return ikona;
     }
-   public void setDying(boolean dying) {
+   public void setvUnicenju(boolean unicen) {
 
-       this.dying = dying;
+       this.unicen = unicen;
    }
 
-   public boolean isDying() {
+   public boolean vUnicenju() {
 
-       return this.dying;
+       return this.unicen;
    }
 
     public void setX(int x) {
