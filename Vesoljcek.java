@@ -1,4 +1,4 @@
-package proj.sprite;
+package spaceInvaders;
 
 import javax.swing.ImageIcon;
 
